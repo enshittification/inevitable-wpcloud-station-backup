@@ -777,6 +777,7 @@ function wpcloud_client_job_status( int $job_id ) {
  * @return mixed|WP_Error Response body on success. WP_Error on failure.
  */
 function wpcloud_client_get( ?int $wpcloud_site_id, string $path ): mixed {
+	do_action( 'wpcloud_client_request', $wpcloud_site_id, 'GET', $path );
 	return wpcloud_client_request( $wpcloud_site_id, 'GET', $path );
 }
 
@@ -790,6 +791,7 @@ function wpcloud_client_get( ?int $wpcloud_site_id, string $path ): mixed {
  * @return mixed|WP_Error Response body on success. WP_Error on failure.
  */
 function wpcloud_client_post( ?int $wpcloud_site_id, string $path, array $body = array() ): mixed {
+	do_action( 'wpcloud_client_request', $wpcloud_site_id, 'POST', $path, $body );
 	return wpcloud_client_request( $wpcloud_site_id, 'POST', $path, $body );
 }
 

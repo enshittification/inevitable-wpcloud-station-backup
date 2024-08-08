@@ -5,7 +5,7 @@
  * @package wpcloud-station
  */
 
- declare( strict_types = 1 );
+declare( strict_types = 1 );
 
 if ( ! class_exists( 'WPCLOUD_Webhook_Controller' ) ) {
 
@@ -37,8 +37,8 @@ if ( ! class_exists( 'WPCLOUD_Webhook_Controller' ) ) {
 				'/' . $this->rest_base,
 				array(
 					array(
-						'methods'  => WP_REST_Server::CREATABLE,
-						'callback' => array( $this, 'post_webhook' ),
+						'methods'             => WP_REST_Server::CREATABLE,
+						'callback'            => array( $this, 'post_webhook' ),
 						'permission_callback' => '__return_true',
 					),
 				)

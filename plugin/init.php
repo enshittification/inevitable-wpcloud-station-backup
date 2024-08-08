@@ -23,6 +23,9 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wpcloud-cli.php';
 }
 
+// @TODO: if in dev mode ...
+require_once plugin_dir_path( __FILE__ ) . 'controllers/class-wpcloud-dev-controller.php';
+
 if ( ! is_admin() ) {
 	require_once plugin_dir_path( __FILE__ ) . 'assets/js/build/index.asset.php';
 	add_action(
@@ -45,6 +48,7 @@ function wpcloud_add_capabilities(): void {
  * Register REST API controllers.
  */
 function wpcloud_register_controllers(): void {
+
 	$webhook_controller = new WPCLOUD_Webhook_Controller();
 	$webhook_controller->register_routes();
 }
