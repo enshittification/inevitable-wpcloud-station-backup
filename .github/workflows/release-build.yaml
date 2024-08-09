@@ -28,6 +28,10 @@ jobs:
         working-directory: './plugin'
         run:  zip -r ../plugin.zip . -x@.distignore
 
+      - name: Build Dev plugin
+        working-directory: './dev-plugin'
+        run:  zip -r ../plugin-dev.zip . -x@.distignore
+
       - name: Setup Node for theme
         uses: actions/setup-node@v2
         with:
@@ -56,6 +60,17 @@ jobs:
           upload_url: ${{steps.get_release.outputs.upload_url }}
           asset_path: ./plugin.zip
           asset_name: wpcloud-station-plugin.zip
+          asset_content_type: application/zip
+
+      - name: Upload Dev Plugin Artifact
+        id: upload-dev-plugin-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{steps.get_release.outputs.upload_url }}
+          asset_path: ./plugin-dev.zip
+          asset_name: wpcloud-station-plugin-dev.zip
           asset_content_type: application/zip
 
       - name: Upload Theme Artifact
