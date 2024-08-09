@@ -23,9 +23,6 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wpcloud-cli.php';
 }
 
-// @TODO: if in dev mode ...
-require_once plugin_dir_path( __FILE__ ) . 'controllers/class-wpcloud-dev-controller.php';
-
 if ( ! is_admin() ) {
 	require_once plugin_dir_path( __FILE__ ) . 'assets/js/build/index.asset.php';
 	add_action(
