@@ -4,30 +4,52 @@ window.onload = () => {
 	let evtSrc = null;
 
 	function displayEvent({ event, data }) {
-		let message = `\x1B[1m ${event.padEnd(13, ' ')}:\x1B[m `;
+
+		let eventMessage = `\x1B[94m[WPCLOUD DEV::\x1B[1m${event}]\x1B[m`;
+		logMessage = eventMessage.padEnd(40, ' ');
+
+		// Log API events
 		if (event.startsWith('API')) {
 			const { method, path } = data;
-			message += `\x1B[94mWPCLOUD DEV - \x1B[32m${method.padEnd(4, ' ')}\x1B[m ${path}`;
+			const showMethod = event.endsWith('REQUEST') ? method : ' >>>';
+			logMessage += `\x1B[92m${showMethod.padEnd(4, ' ')}\x1B[m ${path}`;
 
 			if (event.endsWith('RESPONSE')) {
-				console.log(message, data.response);
+				code = data.response.code;
+				const { message, result } = data.response;
+
+				if (code >= 300) {
+					logMessage += `\x1B[31m - ${code} ${message} \x1B[m`;
+				} else {
+					logMessage += `\x1B[32m - ${code} ${ message }\x1B[m`;
+				}
+
+				if (result) {
+					logMessage += ' data:';
+					console.log(logMessage, result );
+					return
+				}
+				console.log(logMessage);
 			} else {
 				if ('POST' === method) {
-					console.log(message, data.body)
+					console.log(logMessage, data.body)
 				} else {
-					console.log(message)
+					console.log(logMessage)
 				}
 			}
 
 			return;
 		}
 
+		// Log PAGE_VIEW events
 		if ('PAGE_VIEW' === event) {
-			message += `${data.url}`
-			console.log(message);
+			logMessage += `${data.url}`
+			console.log(logMessage);
 			return;
 		}
-		console.log(message, data);
+
+		// default case
+		console.log(logMessage, data);
 	}
 
 	function logToIdxDb(data) {
@@ -46,6 +68,7 @@ window.onload = () => {
 		console.log('connection to server');
 		evtSrc = new EventSource('/wpcloud-station-dev/sse');
 		evtSrc.addEventListener('wpcloud_event', callback);
+		return true;
 	}
 
 	function tailEvents() {
@@ -103,6 +126,6 @@ window.onload = () => {
 		tail : tailEvents,
 		record: recordEvents,
 		replay: replayLog,
-		eventSource: evtSrc
+		eventSource: () => evtSrc
 	}
 };
