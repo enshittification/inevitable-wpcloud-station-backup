@@ -103,6 +103,7 @@ function wpcloud_block_available_wp_versions(): array {
  */
 function wpcloud_block_admin_enqueue_scripts(): void {
 	if ( ! wp_doing_ajax() ) {
+		wp_register_script( 'wpcloud-blocks-site-form', '', array(), '1.0.0', true );
 		wp_enqueue_script( 'wpcloud-blocks-site-form' );
 		wp_add_inline_script(
 			'wpcloud-blocks-site-form',
@@ -112,8 +113,8 @@ function wpcloud_block_admin_enqueue_scripts(): void {
 			'wpcloud.wpVersions=' . wp_json_encode( wpcloud_block_available_wp_versions() ) . ';' .
 			'wpcloud.dataCenters=' . wp_json_encode( wpcloud_block_available_datacenters_options() ) . ';' .
 			'wpcloud.linkableSiteDetails=' . wp_json_encode( WPCloud_Site::get_linkable_detail_options() ) . ';' .
-			'wpcloud.siteMetaOptions=' . wp_json_encode( WPCloud_Site::get_meta_options() ) . ';' .
-			'wpcloud.siteMetaFields=' . wp_json_encode( WPCloud_Site::get_meta_fields() ) . ';'
+			'wpcloud.siteMutableOptions=' . wp_json_encode( WPCloud_Site::get_mutable_options() ) . ';' .
+			'wpcloud.siteMutableFields=' . wp_json_encode( WPCloud_Site::get_mutable_fields() ) . ';'
 		);
 	}
 }

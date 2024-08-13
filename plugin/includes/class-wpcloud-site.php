@@ -187,7 +187,7 @@ class WPCLOUD_Site {
 	 * @return array The detail options
 	 */
 	public static function get_detail_options(): array {
-		return array(
+		$options = array(
 			'site_name'        => __( 'Site Name' ), // only used locally.
 			'site_owner_id'    => __( 'Site Owner ID' ), // only used locally.
 			'domain_name'      => __( 'Domain Name' ),
@@ -214,19 +214,27 @@ class WPCLOUD_Site {
 			'ssl_info'         => __( 'SSL Info' ),
 			'wp_admin_url'     => __( 'WP Admin URL' ),
 			'site_ssh_user'    => __( 'Site SSH User' ),
+			'edge_cache'       => __( 'Edge Cache' ),
 
 			// These are read only meta fields.
 			'max_space_quota'  => __( 'Max Space Quota' ),
 			'space_used'       => __( 'Space Used' ),
 		);
+		return apply_filters( 'wpcloud_site_detail_options', $options );
 	}
 	/**
-	 * Get the meta keys for a WPCLOUD_Site.
+	 * Get mutable option keys
 	 *
 	 * @return array
 	 */
-	public static function get_meta_fields(): array {
-		return wpcloud_client_site_meta_keys();
+	public static function get_mutable_fields(): array {
+		$fields = array();
+		foreach ( self::get_mutable_options() as $key => $option ) {
+			if ( isset( $option['label'] ) ) {
+				$fields[ $key ] = $option;
+			}
+		}
+		return $fields;
 	}
 
 	/**
@@ -237,10 +245,11 @@ class WPCLOUD_Site {
 	 *
 	 * @return array
 	 */
-	public static function get_meta_options(): array {
-		return array(
+	public static function get_mutable_options(): array {
+		$options = array(
 			// db_charset and db_collate should be paired ?
 			'db_charset'           => array(
+				'label'   => __( 'DB Charset' ),
 				'type'    => 'select',
 				'options' => array(
 					'latin1 ' => 'latin1',
@@ -252,6 +261,7 @@ class WPCLOUD_Site {
 			),
 
 			'db_collate'           => array(
+				'label'   => __( 'DB Collate' ),
 				'type'    => 'select',
 				'options' => array(
 					'latin1_swedish_ci'  => 'latin1_swedish_ci',
@@ -263,6 +273,7 @@ class WPCLOUD_Site {
 			),
 
 			'suspended'            => array(
+				'label'   => __( 'Suspended' ),
 				'type'    => 'select',
 				'options' => array(
 					''    => '',
@@ -276,6 +287,7 @@ class WPCLOUD_Site {
 			),
 
 			'suspend_after'        => array(
+				'label'   => __( 'Suspend After' ),
 				'type'    => 'text',
 				'options' => null,
 				'default' => false,
@@ -283,6 +295,7 @@ class WPCLOUD_Site {
 			),
 
 			'php_version'          => array(
+				'label'   => __( 'PHP Version' ),
 				'type'    => 'select',
 				'options' => wpcloud_client_php_versions_available(),
 				'default' => '',
@@ -290,6 +303,7 @@ class WPCLOUD_Site {
 			),
 
 			'wp_version'           => array(
+				'label'   => __( 'WP Version' ),
 				'type'    => 'select',
 				'options' => array(
 					'latest'   => __( 'latest' ),
@@ -301,24 +315,28 @@ class WPCLOUD_Site {
 			),
 
 			'do_not_delete'        => array(
+				'label'   => __( 'Do Not Delete' ),
 				'type'    => 'checkbox',
 				'default' => false,
 				'hint'    => __( 'Prevent a site from begin deleted. This can be useful in some cases. For example, you might wish to preserve a site while it is being reviewed for Terms of Service violations.' ),
 			),
 
 			'space_quota'          => array(
+				'label'   => __( 'Space Quota' ),
 				'type'    => 'text',
 				'default' => 0,
 				'hint'    => __( 'Sets the space quota for a site. Values should be in gigabytes.' ),
 			),
 
 			'photon_subsizes'      => array(
+				'label'   => __( 'Photon Subsizes' ),
 				'type'    => 'checkbox',
 				'default' => false,
 				'hint'    => __( 'Controls whether WP skips generating intermediate image files when an image is uploaded. The platform is able to satisfy requests for intermediate image files whether or not they exist, so sites can save disk space by not creating them. When the a site web server receives a request for a non-existent intermediate image file, it proxies the request to Photon which responds with the intermediate image size.' ),
 			),
 
 			'privacy_model'        => array(
+				'label'   => __( 'Privacy Model' ),
 				'type'    => 'select',
 				'options' => array(
 					''           => '',
@@ -329,6 +347,7 @@ class WPCLOUD_Site {
 			),
 
 			'static_file_404'      => array(
+				'label'   => __( 'Static File 404' ),
 				'type'    => 'select',
 				'options' => array(
 					'lightweight' => __( 'Lightweight' ),
@@ -339,6 +358,7 @@ class WPCLOUD_Site {
 			),
 
 			'default_php_conns'    => array(
+				'label'   => __( 'Default PHP Conns' ),
 				'type'    => 'select',
 				'options' => range( 2, 10 ),
 				'default' => 0,
@@ -346,12 +366,14 @@ class WPCLOUD_Site {
 			),
 
 			'burst_php_conns'      => array(
+				'label'   => __( 'Burst PHP Conns' ),
 				'type'    => 'checkbox',
 				'default' => false,
 				'hint'    => __( 'Enable burst for sites with fewer than 10 default_php_conns. 0 or absent when default_php_conns < 10 means burst is disabled, 1 means burst is enabled.' ),
 			),
 
 			'php_fs_permissions'   => array(
+				'label'   => __( 'PHP FS Permissions' ),
 				'type'    => 'select',
 				'options' => array(
 					'RW'       => __( 'Read/Write' ),
@@ -363,16 +385,35 @@ class WPCLOUD_Site {
 			),
 
 			'canonicalize_aliases' => array(
+				'label'   => __( 'Canonicalize Aliases' ),
 				'type'    => 'checkbox',
 				'default' => true,
 				'hint'    => __( 'May be used to change whether a sites domain aliases redirect (default, "true") to the sites primary domain name or are served directly (when set to "false")' ),
 			),
+
 			'site_access_with_ssh' => array(
+				'label'   => __( 'Site Access With SSH' ),
 				'type'    => 'checkbox',
 				'default' => false,
 				'hint'    => __( 'Site access is via SFTP by default. Enabling allows access via SSH' ),
 			),
+			'edge_cache'           => array(
+				'label'   => __( 'Edge Cache' ),
+				'type'    => 'select',
+				'options' => array(
+					'on'    => __( 'On' ),
+					'off'   => __( 'Off' ),
+					'purge' => __( 'Purge' ),
+				),
+				'option_aliases' => array(
+					'on'  => __( 'Enabled', 'wpcloud' ),
+					'off' => __( 'Disabled', 'wpcloud' ),
+				),
+				'default' => '',
+				'hint'    => __( 'Change the edge cache status. Either `on`, `off` or `purge`' ),
+			),
 		);
+		return apply_filters( 'wpcloud_site_mutable_options', $options );
 	}
 
 	/**
