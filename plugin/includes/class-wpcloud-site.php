@@ -21,91 +21,6 @@ class WPCLOUD_Site {
 	);
 
 	/**
-	 * The ID of the site.
-	 *
-	 * @var int
-	 */
-	// public int $id;
-	/**
-	 * The name of the site.
-	 *
-	 * @var string
-	 */
-	// public string $name;
-
-	/**
-	 * The PHP version of the site.
-	 *
-	 * @var string
-	 */
-	// public string $php_version;
-
-	/**
-	 * The data center of the site.
-	 *
-	 * @var string
-	 */
-	// public string $data_center;
-
-	/**
-	 * The status of the site.
-	 *
-	 * @var string
-	 */
-	// public string $status;
-
-	/**
-	 * The owner ID of the site.
-	 *
-	 * @var int
-	 */
-	// public int $owner_id;
-
-	/**
-	 * The domain of the site.
-	 *
-	 * @var string
-	 */
-	// public string $domain;
-
-	/**
-	 * The WP Cloud site ID.
-	 *
-	 * @var int
-	 */
-	// public int $wpcloud_site_id;
-
-	/**
-	 * The details of the site.
-	 *
-	 * @var array
-	 */
-	// public array $details;
-
-	/**
-	 * The error message of the site.
-	 *
-	 * @var string
-	 */
-	// public string $error_message;
-
-	/**
-	 * WPCLOUD_Site constructor.
-	 */
-	/*
-	public function __construct() {
-		$this->id              = 0;
-		$this->name            = '';
-		$this->php_version     = '';
-		$this->data_center     = '';
-		$this->status          = '';
-		$this->owner_id        = 0;
-		$this->wpcloud_site_id = 0;
-		$this->details         = array();
-		$this->error_message   = '';
-	}
-	*/
-	/**
 	 * Create a new WPCLOUD_Site.
 	 *
 	 * Example options:
@@ -624,27 +539,5 @@ class WPCLOUD_Site {
 		);
 
 		return in_array( $key, $refresh_keys, true );
-	}
-
-	/**
-	 * Get the domain alias list for the current site.
-	 *
-	 * @return array The domain alias list.
-	 */
-	public static function get_domain_alias_list(): array {
-		$wpcloud_site_id = wpcloud_get_current_site_id();
-
-		if ( ! $wpcloud_site_id ) {
-			return array();
-		}
-
-		$result = wpcloud_client_site_domain_alias_list( $wpcloud_site_id );
-
-		if ( is_wp_error( $result ) ) {
-			error_log( $result->get_error_message() );
-			return array();
-		}
-
-		return $result;
 	}
 }

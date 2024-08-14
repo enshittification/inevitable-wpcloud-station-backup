@@ -266,12 +266,20 @@ add_action( 'wpcloud_webhook_site_provisioned', 'wpcloud_on_site_provisioned', 1
 /**
  * Get the current site ID.
  *
+ * @param int|WP_Post $post The post ID or post object.
+ *
  * @return int The site ID.
  */
-function wpcloud_get_current_site_id(): int {
-	$post_id = get_the_ID();
-	if ( ! $post_id ) {
-		return 0;
+function wpcloud_get_current_site_id( int|WP_Post $post = null ): int {
+	if ( ! $post ) {
+		$post_id = get_the_ID();
+		if ( ! $post_id ) {
+			return 0;
+		}
+	} elseif ( $post instanceof WP_Post ) {
+		$post_id = $post->ID;
+	} else {
+		$post_id = $post;
 	}
 
 	$wpcloud_site_id = get_post_meta( $post_id, 'wpcloud_site_id', true );
@@ -280,30 +288,6 @@ function wpcloud_get_current_site_id(): int {
 	}
 
 	return intval( $wpcloud_site_id );
-}
-
-/**
- * Get the domain alias list for the current site.
- *
- * @deprecated Use WPCLOUD_Site::get_domain_alias_list instead.
- *
- * @return array The domain alias list.
- */
-function wpcloud_get_domain_alias_list(): array {
-	$wpcloud_site_id = wpcloud_get_current_site_id();
-
-	if ( ! $wpcloud_site_id ) {
-		return array();
-	}
-
-	$result = wpcloud_client_site_domain_alias_list( $wpcloud_site_id );
-
-	if ( is_wp_error( $result ) ) {
-		error_log( $result->get_error_message() );
-		return array();
-	}
-
-	return $result;
 }
 
 /**
