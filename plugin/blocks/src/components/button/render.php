@@ -45,7 +45,7 @@ switch ( $block_type ) {
 
 	case 'detail':
 		$classes[] = 'wpcloud-block-button__detail';
-		$detail    = wpcloud_get_site_detail( get_the_ID(), $attributes['name'] );
+		$detail    = WPCLOUD_Site::get_detail( get_the_ID(), $attributes['name'] );
 		if ( is_wp_error( $detail ) ) {
 			error_log( $detail->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			break;

@@ -29,7 +29,7 @@ $content = apply_filters( 'wpcloud_block_form_render_field', $content, $attribut
 $site_mutable_options = WPCloud_Site::get_mutable_options();
 
 if ( array_key_exists( $name, $site_mutable_options ) ) {
-	$current_value = wpcloud_get_site_detail( get_the_ID(), $name );
+	$current_value = WPCLOUD_Site::get_detail( get_the_ID(), $name );
 	if ( 'ssh_port' === $name ) {
 		error_log( 'WP Cloud: ' . $current_value );
 	}
