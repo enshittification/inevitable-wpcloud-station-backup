@@ -37,7 +37,7 @@ if ( ! $site_thumbnail ) {
 }
 $wrapper_attributes = $wrapper . ' ' . get_block_wrapper_attributes( array( 'class' => trim( $class_names ) ) );
 
-$domain_name = wpcloud_get_site_detail( $post_in_loop_id, 'domain_name' );
+$domain_name = WPCLOUD_Site::get_detail( $post_in_loop_id, 'domain_name' );
 if ( is_wp_error( $domain_name ) ) {
 	error_log( 'Error getting domain name: ' . $domain_name->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 	$domain_name = '';

@@ -54,7 +54,7 @@ function wpcloud_block_form_site_update_handler( $response, $data ) {
 
 			case 'suspend_after':
 				// Don't set the suspend_after value if it's the same as the current value or is not set.
-				$current_suspend_value = wpcloud_get_site_detail( $data['site_id'], 'suspend_after' );
+				$current_suspend_value = WPCLOUD_Site::get_detail( $data['site_id'], 'suspend_after' );
 				if ( is_null( $current_suspend_value ) ) {
 					$current_suspend_value = '';
 				}

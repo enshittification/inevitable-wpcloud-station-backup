@@ -264,159 +264,6 @@ function wpcloud_on_site_provisioned( int $timestamp, int $wpcloud_site_id ): vo
 add_action( 'wpcloud_webhook_site_provisioned', 'wpcloud_on_site_provisioned', 10, 2 );
 
 /**
- * Get a site detail.
- *
- * @param int|WP_Post $post The site post or ID.
- * @param string      $key The detail key.
- *
- * @return mixed The detail value. WP_Error on error.
- */
-function wpcloud_get_site_detail( int|WP_Post $post, string $key, ): mixed {
-	if ( is_int( $post ) ) {
-		$post = get_post( $post );
-	}
-
-	if ( ! $post ) {
-		return null;
-	}
-
-	$wpcloud_site_id = get_post_meta( $post->ID, 'wpcloud_site_id', true );
-	if ( empty( $wpcloud_site_id ) ) {
-		return null;
-	}
-
-	$wpcloud_site_id = intval( $wpcloud_site_id );
-
-	$result = '';
-	switch ( $key ) {
-		case 'phpmyadmin_url':
-			$result = wpcloud_client_site_phpmyadmin_url( $wpcloud_site_id );
-			return $result;
-
-		case 'ssl_info':
-			// @TODO getting timeout errors but probably since we are not using valid domains ?
-			// $result = wpcloud_client_site_ssl_info( $wpcloud_site_id );
-			return '';
-
-		case 'ip_addresses':
-			$details = wpcloud_client_site_details( $wpcloud_site_id );
-			if ( is_wp_error( $details ) ) {
-				error_log( $details->get_error_message() );
-				return '';
-			}
-			$domain = $details->domain_name;
-			$result = wpcloud_client_site_ip_addresses( $domain );
-
-			if ( is_wp_error( $result ) ) {
-				error_log( $result->get_error_message() );
-				return '';
-			}
-			return $result->suggested ?? $result->ips ?? '';
-
-		case 'site_name':
-			return $post->post_title;
-
-		case 'wp_admin_url':
-			$result = wpcloud_client_site_details( $wpcloud_site_id, true );
-			if ( is_wp_error( $result ) ) {
-				error_log( $result->get_error_message() );
-				return '';
-			}
-
-			return 'https://' . $result->domain_name . '/wp-admin';
-
-		case 'space_quota':
-			$result = wpcloud_client_get_site_meta( $wpcloud_site_id, 'space_quota' );
-			if ( is_wp_error( $result ) ) {
-				error_log( $result->get_error_message() );
-				return '';
-			}
-
-			// Make the size human readable.
-			$bytes = (float) $result->space_quota;
-			$i     = floor( log( $bytes, 1024 ) );
-			$gigs  = round( $bytes / pow( 1024, $i ), 2 );
-			return $gigs . 'G';
-
-		case 'site_access_with_ssh':
-			$result = wpcloud_client_get_site_meta( $wpcloud_site_id, 'ssh_port' );
-			if ( is_wp_error( $result ) ) {
-				error_log( $result->get_error_message() );
-				return '';
-			}
-			$ssh_port = $result->ssh_port ?? -1;
-			// @TODO: Confirm that this is always the case, it appears that the port will be 2223 for ssh and 2221 for sftp
-			return 2223 === $ssh_port;
-
-		case 'edge_cache':
-			$result = wpcloud_client_edge_cache_status( $wpcloud_site_id );
-			if ( is_wp_error( $result ) ) {
-				error_log( $result->get_error_message() );
-				return '';
-			}
-			switch ( $result->status ) {
-				case 0:
-					return __( 'Disabled', 'wpcloud' );
-				case 1:
-					return __( 'Enabled', 'wpcloud' );
-				case 2:
-					return __( 'DDoS', 'wpcloud' );
-				default:
-					return __( 'Unknown', 'wpcloud' );
-			}
-			return '';
-
-		case 'defensive_mode':
-			$result = wpcloud_client_edge_cache_status( $wpcloud_site_id );
-
-			if ( is_wp_error( $result ) ) {
-				error_log( $result->get_error_message() );
-				return '';
-			}
-			$ddos_until = $result->ddos_until ?? -1;
-			if ( $ddos_until <= 0 ) {
-				return __( 'Disabled', 'wpcloud' );
-			}
-			$date_format = get_option( 'date_format' );
-			$time_format = get_option( 'time_format' );
-			return __( 'Enabled until: ' ) . gmdate( "$date_format $time_format", $ddos_until );
-
-		case 'data_center':
-			$key = 'geo_affinity';
-			// Fallthrough intentional to set the result.
-		default:
-			$result = wpcloud_client_site_details( $wpcloud_site_id, true );
-	}
-
-	if ( is_wp_error( $result ) ) {
-		return $result;
-	}
-	if ( 'geo_affinity' === $key ) {
-		return $result->extra->server_pool->geo_affinity;
-	}
-
-	if ( ! isset( $result->$key ) ) {
-		return null;
-	}
-
-	return $result->$key;
-}
-
-/**
- * Check if a site detail should be refreshed.
- *
- * @param string $key The detail key.
- * @return bool True if the detail should be refreshed.
- */
-function wpcloud_should_refresh_detail( string $key ): bool {
-	$refresh_keys = array(
-		'phpmyadmin_url',
-	);
-
-	return in_array( $key, $refresh_keys, true );
-}
-
-/**
  * Get the current site ID.
  *
  * @return int The site ID.
@@ -426,6 +273,22 @@ function wpcloud_get_current_site_id(): int {
 	if ( ! $post_id ) {
 		return 0;
 	}
+	return wpcloud_get_site_id( $post_id );
+}
+
+/**
+ * Get the site ID for a post.
+ *
+ * @param int|WP_Post $post The post ID or post object.
+ *
+ * @return int The site ID.
+ */
+function wpcloud_get_site_id( int|WP_Post $post ): int {
+	if ( $post instanceof WP_Post ) {
+		$post_id = $post->ID;
+	} else {
+		$post_id = $post;
+	}
 
 	$wpcloud_site_id = get_post_meta( $post_id, 'wpcloud_site_id', true );
 	if ( empty( $wpcloud_site_id ) ) {
@@ -433,28 +296,6 @@ function wpcloud_get_current_site_id(): int {
 	}
 
 	return intval( $wpcloud_site_id );
-}
-
-/**
- * Get the domain alias list for the current site.
- *
- * @return array The domain alias list.
- */
-function wpcloud_get_domain_alias_list(): array {
-	$wpcloud_site_id = wpcloud_get_current_site_id();
-
-	if ( ! $wpcloud_site_id ) {
-		return array();
-	}
-
-	$result = wpcloud_client_site_domain_alias_list( $wpcloud_site_id );
-
-	if ( is_wp_error( $result ) ) {
-		error_log( $result->get_error_message() );
-		return array();
-	}
-
-	return $result;
 }
 
 /**

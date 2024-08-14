@@ -16,7 +16,7 @@ if ( $attributes['adminOnly'] && ! current_user_can( 'manage_options' ) ) {
 }
 // Grab the detail name and value.
 $name   = $attributes['name'] ?? '';
-$value  = wpcloud_get_site_detail( get_the_ID(), $name ) ?? '';
+$value  = WPCLOUD_Site::get_detail( get_the_ID(), $name ) ?? '';
 $detail = '';
 
 if ( is_wp_error( $value ) ) {
