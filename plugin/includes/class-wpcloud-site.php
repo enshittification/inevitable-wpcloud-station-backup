@@ -23,73 +23,74 @@ class WPCLOUD_Site {
 	 *
 	 * @var int
 	 */
-	public int $id;
+	// public int $id;
 	/**
 	 * The name of the site.
 	 *
 	 * @var string
 	 */
-	public string $name;
+	// public string $name;
 
 	/**
 	 * The PHP version of the site.
 	 *
 	 * @var string
 	 */
-	public string $php_version;
+	// public string $php_version;
 
 	/**
 	 * The data center of the site.
 	 *
 	 * @var string
 	 */
-	public string $data_center;
+	// public string $data_center;
 
 	/**
 	 * The status of the site.
 	 *
 	 * @var string
 	 */
-	public string $status;
+	// public string $status;
 
 	/**
 	 * The owner ID of the site.
 	 *
 	 * @var int
 	 */
-	public int $owner_id;
+	// public int $owner_id;
 
 	/**
 	 * The domain of the site.
 	 *
 	 * @var string
 	 */
-	public string $domain;
+	// public string $domain;
 
 	/**
 	 * The WP Cloud site ID.
 	 *
 	 * @var int
 	 */
-	public int $wpcloud_site_id;
+	// public int $wpcloud_site_id;
 
 	/**
 	 * The details of the site.
 	 *
 	 * @var array
 	 */
-	public array $details;
+	// public array $details;
 
 	/**
 	 * The error message of the site.
 	 *
 	 * @var string
 	 */
-	public string $error_message;
+	// public string $error_message;
 
 	/**
 	 * WPCLOUD_Site constructor.
 	 */
+	/*
 	public function __construct() {
 		$this->id              = 0;
 		$this->name            = '';
@@ -101,7 +102,7 @@ class WPCLOUD_Site {
 		$this->details         = array();
 		$this->error_message   = '';
 	}
-
+	*/
 	/**
 	 * Create a new WPCLOUD_Site.
 	 *
@@ -204,14 +205,12 @@ class WPCLOUD_Site {
 			'db_charset'       => __( 'DB Charset' ),
 			'db_collate'       => __( 'DB Collate' ),
 			'cache_prefix'     => __( 'Cache Prefix' ),
-			'chroot_path'      => __( 'Chroot Path' ),
 			'chroot_ssh_path'  => __( 'Chroot SSH Path' ),
 			'site_api_key'     => __( 'Site API Key' ),
 			'atomic_site_id'   => __( 'Atomic Site ID' ),
 			'atomic_client_id' => __( 'Atomic Client ID' ),
 			'server_pool_id'   => __( 'Server Pool ID' ),
 			'phpmyadmin_url'   => __( 'phpMyAdmin URL' ),
-			'ssl_info'         => __( 'SSL Info' ),
 			'wp_admin_url'     => __( 'WP Admin URL' ),
 			'site_ssh_user'    => __( 'Site SSH User' ),
 			'edge_cache'       => __( 'Edge Cache' ),
@@ -221,6 +220,8 @@ class WPCLOUD_Site {
 			// These are read only meta fields.
 			'max_space_quota'  => __( 'Max Space Quota' ),
 			'space_used'       => __( 'Space Used' ),
+			'db_file_size'     => __( 'DB File Size' ),
+			'ssl_status'       => __( 'SSL Status' ),
 		);
 		return apply_filters( 'wpcloud_site_detail_options', $options );
 	}
@@ -469,5 +470,157 @@ class WPCLOUD_Site {
 				return $phpmyadmin_url;
 		}
 		return '';
+	}
+	/**
+	 * Get a site detail.
+	 *
+	 * @param int|WP_Post $post The site post or ID.
+	 * @param string      $key The detail key.
+	 *
+	 * @return mixed The detail value. WP_Error on error.
+	 */
+	public static function get_detail( int|WP_Post $post, string $key, ): mixed {
+		if ( is_int( $post ) ) {
+			$post = get_post( $post );
+		}
+
+		if ( ! $post ) {
+			return null;
+		}
+
+		$wpcloud_site_id = get_post_meta( $post->ID, 'wpcloud_site_id', true );
+		if ( empty( $wpcloud_site_id ) ) {
+			return null;
+		}
+
+		$wpcloud_site_id = intval( $wpcloud_site_id );
+
+		$result = '';
+		switch ( $key ) {
+			case 'phpmyadmin_url':
+				$result = wpcloud_client_site_phpmyadmin_url( $wpcloud_site_id );
+				return $result;
+
+			case 'ssl_info':
+				// @TODO getting timeout errors but probably since we are not using valid domains ?
+				// $result = wpcloud_client_site_ssl_info( $wpcloud_site_id );
+				return '';
+
+			case 'ip_addresses':
+				$details = wpcloud_client_site_details( $wpcloud_site_id );
+				if ( is_wp_error( $details ) ) {
+					error_log( $details->get_error_message() );
+					return '';
+				}
+				$domain = $details->domain_name;
+				$result = wpcloud_client_site_ip_addresses( $domain );
+
+				if ( is_wp_error( $result ) ) {
+					error_log( $result->get_error_message() );
+					return '';
+				}
+				return $result->suggested ?? $result->ips ?? '';
+
+			case 'site_name':
+				return $post->post_title;
+
+			case 'wp_admin_url':
+				$result = wpcloud_client_site_details( $wpcloud_site_id, true );
+				if ( is_wp_error( $result ) ) {
+					error_log( $result->get_error_message() );
+					return '';
+				}
+
+				return 'https://' . $result->domain_name . '/wp-admin';
+
+			case 'space_quota':
+				$result = wpcloud_client_get_site_meta( $wpcloud_site_id, 'space_quota' );
+				if ( is_wp_error( $result ) ) {
+					error_log( $result->get_error_message() );
+					return '';
+				}
+
+				// Make the size human readable.
+				$bytes = (float) $result->space_quota;
+				$i     = floor( log( $bytes, 1024 ) );
+				$gigs  = round( $bytes / pow( 1024, $i ), 2 );
+				return $gigs . 'G';
+
+			case 'site_access_with_ssh':
+				$result = wpcloud_client_get_site_meta( $wpcloud_site_id, 'ssh_port' );
+				if ( is_wp_error( $result ) ) {
+					error_log( $result->get_error_message() );
+					return '';
+				}
+				$ssh_port = $result->ssh_port ?? -1;
+				// @TODO: Confirm that this is always the case, it appears that the port will be 2223 for ssh and 2221 for sftp
+				return 2223 === $ssh_port;
+
+			case 'edge_cache':
+				$result = wpcloud_client_edge_cache_status( $wpcloud_site_id );
+				if ( is_wp_error( $result ) ) {
+					error_log( $result->get_error_message() );
+					return '';
+				}
+				switch ( $result->status ) {
+					case 0:
+						return __( 'Disabled', 'wpcloud' );
+					case 1:
+						return __( 'Enabled', 'wpcloud' );
+					case 2:
+						return __( 'DDoS', 'wpcloud' );
+					default:
+						return __( 'Unknown', 'wpcloud' );
+				}
+				return '';
+
+			case 'defensive_mode':
+				$result = wpcloud_client_edge_cache_status( $wpcloud_site_id );
+
+				if ( is_wp_error( $result ) ) {
+					error_log( $result->get_error_message() );
+					return '';
+				}
+				$ddos_until = $result->ddos_until ?? -1;
+				if ( $ddos_until <= 0 ) {
+					return __( 'Disabled', 'wpcloud' );
+				}
+				$date_format = get_option( 'date_format' );
+				$time_format = get_option( 'time_format' );
+				return __( 'Enabled until: ' ) . gmdate( "$date_format $time_format", $ddos_until );
+
+			case 'data_center':
+				$key = 'geo_affinity';
+				// Fallthrough intentional to set the result.
+			default:
+				$result = wpcloud_client_site_details( $wpcloud_site_id, true );
+		}
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		if ( 'geo_affinity' === $key ) {
+			return $result->extra->server_pool->geo_affinity;
+		}
+
+		if ( ! isset( $result->$key ) ) {
+			return null;
+		}
+
+		return $result->$key;
+	}
+
+	/**
+	 * Check if a site detail should be refreshed.
+	 *
+	 * @param string $key The detail key.
+	 * @return bool True if the detail should be refreshed.
+	 */
+	public static function should_refresh_detail( string $key ): bool {
+		$refresh_keys = array(
+			'phpmyadmin_url',
+		);
+
+		return in_array( $key, $refresh_keys, true );
 	}
 }

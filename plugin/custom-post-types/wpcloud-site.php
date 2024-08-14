@@ -266,6 +266,8 @@ add_action( 'wpcloud_webhook_site_provisioned', 'wpcloud_on_site_provisioned', 1
 /**
  * Get a site detail.
  *
+ * @deprecated Use WPCLOUD_Site::get_detail instead.
+ *
  * @param int|WP_Post $post The site post or ID.
  * @param string      $key The detail key.
  *
@@ -405,6 +407,8 @@ function wpcloud_get_site_detail( int|WP_Post $post, string $key, ): mixed {
 /**
  * Check if a site detail should be refreshed.
  *
+ * @deprecated Use WPCLOUD_Site::should_refresh_detail instead.
+ *
  * @param string $key The detail key.
  * @return bool True if the detail should be refreshed.
  */
@@ -437,6 +441,8 @@ function wpcloud_get_current_site_id(): int {
 
 /**
  * Get the domain alias list for the current site.
+ *
+ * @deprecated Use WPCLOUD_Site::get_domain_alias_list instead.
  *
  * @return array The domain alias list.
  */
