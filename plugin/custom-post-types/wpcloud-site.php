@@ -266,8 +266,6 @@ add_action( 'wpcloud_webhook_site_provisioned', 'wpcloud_on_site_provisioned', 1
 /**
  * Get the current site ID.
  *
- * @param int|WP_Post $post The post ID or post object.
- *
  * @return int The site ID.
  */
 function wpcloud_get_current_site_id(): int {
