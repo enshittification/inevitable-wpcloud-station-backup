@@ -397,20 +397,10 @@ class WPCLOUD_Site {
 	 * @return mixed The detail value. WP_Error on error.
 	 */
 	public static function get_detail( int|WP_Post $post, string $key, ): mixed {
-		if ( is_int( $post ) ) {
-			$post = get_post( $post );
-		}
-
-		if ( ! $post ) {
-			return null;
-		}
-
-		$wpcloud_site_id = get_post_meta( $post->ID, 'wpcloud_site_id', true );
+		$wpcloud_site_id = wpcloud_get_site_id( $post );
 		if ( empty( $wpcloud_site_id ) ) {
 			return null;
 		}
-
-		$wpcloud_site_id = intval( $wpcloud_site_id );
 
 		$result = '';
 		switch ( $key ) {

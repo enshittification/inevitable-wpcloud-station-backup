@@ -270,13 +270,23 @@ add_action( 'wpcloud_webhook_site_provisioned', 'wpcloud_on_site_provisioned', 1
  *
  * @return int The site ID.
  */
-function wpcloud_get_current_site_id( int|WP_Post $post = null ): int {
-	if ( ! $post ) {
-		$post_id = get_the_ID();
-		if ( ! $post_id ) {
-			return 0;
-		}
-	} elseif ( $post instanceof WP_Post ) {
+function wpcloud_get_current_site_id(): int {
+	$post_id = get_the_ID();
+	if ( ! $post_id ) {
+		return 0;
+	}
+	return wpcloud_get_site_id( $post_id );
+}
+
+/**
+ * Get the site ID for a post.
+ *
+ * @param int|WP_Post $post The post ID or post object.
+ *
+ * @return int The site ID.
+ */
+function wpcloud_get_site_id( int|WP_Post $post ): int {
+	if ( $post instanceof WP_Post ) {
 		$post_id = $post->ID;
 	} else {
 		$post_id = $post;
