@@ -5,6 +5,8 @@
  * @package wpcloud-station
  */
 
+// phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_error_log
+
 declare( strict_types = 1 );
 
 /**
@@ -622,5 +624,27 @@ class WPCLOUD_Site {
 		);
 
 		return in_array( $key, $refresh_keys, true );
+	}
+
+	/**
+	 * Get the domain alias list for the current site.
+	 *
+	 * @return array The domain alias list.
+	 */
+	public static function get_domain_alias_list(): array {
+		$wpcloud_site_id = wpcloud_get_current_site_id();
+
+		if ( ! $wpcloud_site_id ) {
+			return array();
+		}
+
+		$result = wpcloud_client_site_domain_alias_list( $wpcloud_site_id );
+
+		if ( is_wp_error( $result ) ) {
+			error_log( $result->get_error_message() );
+			return array();
+		}
+
+		return $result;
 	}
 }

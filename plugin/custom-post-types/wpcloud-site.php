@@ -263,23 +263,6 @@ function wpcloud_on_site_provisioned( int $timestamp, int $wpcloud_site_id ): vo
 }
 add_action( 'wpcloud_webhook_site_provisioned', 'wpcloud_on_site_provisioned', 10, 2 );
 
-
-/**
- * Check if a site detail should be refreshed.
- *
- * @deprecated Use WPCLOUD_Site::should_refresh_detail instead.
- *
- * @param string $key The detail key.
- * @return bool True if the detail should be refreshed.
- */
-function wpcloud_should_refresh_detail( string $key ): bool {
-	$refresh_keys = array(
-		'phpmyadmin_url',
-	);
-
-	return in_array( $key, $refresh_keys, true );
-}
-
 /**
  * Get the current site ID.
  *

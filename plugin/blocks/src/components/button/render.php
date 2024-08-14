@@ -53,7 +53,7 @@ switch ( $block_type ) {
 		$button_attributes['data-wpcloud-detail'] = $attributes['name'];
 		$url                                      = $detail;
 
-		if ( wpcloud_should_refresh_detail( $attributes['name'] ) ) {
+		if ( WPCLOUD_Site::should_refresh_detail( $attributes['name'] ) ) {
 			$nonce                                  = wp_create_nonce( 'wpcloud_refresh_link' );
 			$button_attributes['data-nonce']        = $nonce;
 			$button_attributes['data-refresh-rate'] = $attributes['refreshRate'] ?? 10000;
