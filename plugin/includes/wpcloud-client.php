@@ -288,13 +288,13 @@ function wpcloud_client_site_domain_alias_remove( int $wpcloud_site_id, string $
 }
 
 /**
- * Get SSL certificate information for site.
+ * Set primary domain for a site.
  *
  * @param integer $wpcloud_site_id The WP Cloud Site ID.
  * @param string  $domain          Required. The new domain for the site.
  * @param bool    $keep            Optional. True to keep previous domain as an alias. Default: false.
  *
- * @return object|WP_Error SSL certificate information on success. WP_Error on error.
+ * @return object|WP_Error  OK or WP_Error on error.
  */
 function wpcloud_client_site_domain_primary_set( int $wpcloud_site_id, string $domain, bool $keep = false ): mixed {
 	$client_name = wpcloud_get_client_name();
@@ -378,12 +378,12 @@ function wpcloud_client_site_phpmyadmin_url( int $wpcloud_site_id ): mixed {
 /**
  * Get SSL certificate information for site.
  *
- * @param integer $wpcloud_site_id The WP Cloud Site ID.
+ * @param string $domain The site domain.
  *
- * @return object|WP_Error SSL certificate information on success. WP_Error on error.
+ * @return stdClass|WP_Error SSL certificate information on success. WP_Error on error.
  */
-function wpcloud_client_site_ssl_info( int $wpcloud_site_id ): mixed {
-	return wpcloud_client_post( $wpcloud_site_id, "ssl-info/{$wpcloud_site_id}" );
+function wpcloud_client_site_ssl_info( string $domain ): stdClass|WP_error {
+	return wpcloud_client_post( null, "ssl-info/$domain" );
 }
 
 /**
@@ -647,7 +647,7 @@ function wpcloud_client_site_meta_keys(): array {
  * @return mixed|WP_Error Response body on success. WP_Error on failure.
  */
 function wpcloud_client_update_site_meta( int $wpcloud_site_id, string $key, string|null $value ): mixed {
-	if ( ! in_array( $key, wpcloud_client_site_meta_keys() ) ) {
+	if ( ! in_array( $key, wpcloud_client_site_meta_keys(), true ) ) {
 		return new WP_Error( 'bad_request', 'Invalid meta key', array( 'status' => 400 ) );
 	}
 
@@ -671,7 +671,7 @@ function wpcloud_client_update_site_meta( int $wpcloud_site_id, string $key, str
  * @return mixed|WP_Error Response body on success. WP_Error on failure.
  */
 function wpcloud_client_delete_site_meta( int $wpcloud_site_id, string $key ): mixed {
-	if ( ! in_array( $key, wpcloud_client_site_meta_keys() ) ) {
+	if ( ! in_array( $key, wpcloud_client_site_meta_keys(), true ) ) {
 		return new WP_Error( 'bad_request', 'Invalid meta key', array( 'status' => 400 ) );
 	}
 
@@ -690,7 +690,7 @@ function wpcloud_client_delete_site_meta( int $wpcloud_site_id, string $key ): m
  */
 function wpcloud_client_get_site_meta( int $wpcloud_site_id, string $key, bool $use_cache = true ): stdClass|WP_Error {
 	$get_meta = function () use ( $wpcloud_site_id, $key ) {
-		if ( ! in_array( $key, wpcloud_client_site_meta_keys() ) ) {
+		if ( ! in_array( $key, wpcloud_client_site_meta_keys(), true ) ) {
 			return new WP_Error( 'bad_request', 'Invalid meta key', array( 'status' => 400 ) );
 		}
 
