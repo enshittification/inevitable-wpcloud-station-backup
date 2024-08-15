@@ -37,7 +37,7 @@
 		row.classList.add( 'wpcloud-hide' );
 	}
 
-	function onSiteAliasAdded( alias ) {
+	function onSiteAliasAdded( alias, needsVerification ) {
 		const row = aliasList
 			.querySelector(
 				'.wpcloud-block-site-alias-list__row[style*="display:none"]'
@@ -55,9 +55,18 @@
 
 		// Set up the new forms
 		newRow.querySelectorAll( 'form' ).forEach( ( form ) => {
-			form.querySelector( 'input[name=site_alias]' ).value = alias;
-			wpcloud.bindFormHandler( form );
-		} );
+			const inputSiteAlias = form.querySelector('input[name=site_alias]');
+			if (inputSiteAlias) {
+				inputSiteAlias.value = alias;
+			}
+			wpcloud.bindFormHandler(form);
+		});
+
+		if (needsVerification) {
+			['.wpcloud-block-form-request_txt_verification', '.alias-warning'].forEach((selector) => {
+				newRow.querySelector(selector).classList.remove('display-none');
+			});
+		}
 
 
 		const aliasValueNode = newRow.querySelector('.wpcloud-block-site-detail__value');
@@ -194,7 +203,8 @@
 		const response = await fetch(`/wp-json/wpcloud/v1/domains/ssl-status?domain=${domain}`);
 		const result = await response.json();
 		if ( result.success && ! result.valid ) {
-			form.classList.remove( 'display-none' );
+			form.classList.remove('display-none');
+			form.closest('.wpcloud-block-site-alias-list__row').querySelector('.alias-warning')?.classList.remove('display-none');
 		} else {
 			form.classList.add( 'display-none' );
 		}
