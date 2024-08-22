@@ -1,11 +1,9 @@
 <?php
 /**
  * Title: Add Site Form
- * Slug: wpcloud-station/page-add-site
+ * Slug: wpcloud-station/form-add-site
  * Categories: wpcloud_forms
  * Keywords: starter
- * Blocks: wpcloud/site-create
- * Post Types: page
  * Description: Add new site form.
  */
 ?>
