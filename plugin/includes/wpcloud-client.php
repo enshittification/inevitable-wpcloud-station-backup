@@ -46,9 +46,9 @@ function wpcloud_get_client_api_key(): mixed {
  * @param integer|null $wpcloud_site_id Optional. The WP Cloud Site ID.
  * @param string       $domain          The domain for which to get the IP addresses.
  *
- * @return object|WP_Error Domain verification record. WP_Error on error.
+ * @return stdClass|WP_Error Domain verification record. WP_Error on error.
  */
-function wpcloud_client_domain_ip_addresses( ?int $wpcloud_site_id, string $domain = '' ): mixed {
+function wpcloud_client_domain_ip_addresses( ?int $wpcloud_site_id, string $domain = '' ): stdClass|WP_Error {
 	$client_name = wpcloud_get_client_name();
 
 	return wpcloud_client_get( $wpcloud_site_id, "get-ips/{$client_name}/{$domain}" );
@@ -828,10 +828,31 @@ function wpcloud_client_site_persist_data_delete( int $wpcloud_site_id, string $
  *
  * @return string|WP_Error "success", "failure", "queued". WP Error on error.
  */
-function wpcloud_client_job_status( int $job_id ) {
+function wpcloud_client_job_status( int $job_id ): string|WP_Error {
 	return wpcloud_client_get( null, "job-completion/{$job_id}" );
 }
 
+/**
+ * Get the status of a test job.
+ *
+ * @param integer     $code    The test code.
+ * @param null|string $message The test message.
+ *
+ * @return true|WP_Error True if the test status matches the code and message. WP_Error on error.
+ */
+function wpcloud_client_test_status( int $code = 200, ?string $message = 'OK' ): true|WP_Error {
+	$result = wpcloud_client_get( null, "test-status/$code/$message" );
+
+	if ( is_wp_error( $result ) ) {
+		return $result;
+	}
+
+	if ( $message !== $result->message || 'OK' !== $result->message ) {
+		return new WP_Error( 'failure', 'Unexpected response', array( 'status' => 500 ) );
+	}
+
+	return true;
+}
 /**
  * Make a GET request the WP Cloud API.
  *

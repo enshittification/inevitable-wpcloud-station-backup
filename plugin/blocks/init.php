@@ -97,12 +97,17 @@ function wpcloud_block_available_wp_versions(): array {
 }
 
 /**
- * Enqueue the admin scripts.
+ * Enqueue the block admin scripts in the editor.
+ *
+ * @param WP_Screen $current_screen The current screen.
  *
  * @return void
  */
-function wpcloud_block_admin_enqueue_scripts(): void {
-	if ( ! wp_doing_ajax() ) {
+function wpcloud_block_admin_enqueue_scripts( $current_screen ): void {
+	if ( ! $current_screen instanceof WP_Screen ) {
+		return;
+	}
+	if ( $current_screen->is_block_editor() || 'site-editor' === $current_screen->base ) {
 		wp_register_script( 'wpcloud-blocks-site-form', '', array(), '1.0.0', true );
 		wp_enqueue_script( 'wpcloud-blocks-site-form' );
 		wp_add_inline_script(
@@ -114,8 +119,9 @@ function wpcloud_block_admin_enqueue_scripts(): void {
 			'wpcloud.dataCenters=' . wp_json_encode( wpcloud_block_available_datacenters_options() ) . ';' .
 			'wpcloud.linkableSiteDetails=' . wp_json_encode( WPCloud_Site::get_linkable_detail_options() ) . ';' .
 			'wpcloud.siteMutableOptions=' . wp_json_encode( WPCloud_Site::get_mutable_options() ) . ';' .
-			'wpcloud.siteMutableFields=' . wp_json_encode( WPCloud_Site::get_mutable_fields() ) . ';'
+			'wpcloud.siteMutableFields=' . wp_json_encode( WPCloud_Site::get_mutable_fields() ) . ';' .
+			'wpcloud.apiConnected=' . wp_json_encode( WPCloud_Site::is_api_connected() ) . ';'
 		);
 	}
 }
-add_action( 'admin_init', 'wpcloud_block_admin_enqueue_scripts' );
+add_action( 'current_screen', 'wpcloud_block_admin_enqueue_scripts' );
