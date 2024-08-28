@@ -485,10 +485,13 @@ function wpcloud_client_data_centers_available( bool $include_no_preference = fa
 		$result = array_intersect_key( wpcloud_client_data_center_mapping(), array_flip( $response ) );
 
 		if ( $include_no_preference ) {
+			$available = $result;
 			$result = array(
 				'' => __( 'No Preference' ),
-				...$result,
 			);
+			foreach ( $available as $key => $name ) {
+				$result[ $key ] = $name;
+			}
 		}
 
 		return (object) $result;
@@ -840,7 +843,7 @@ function wpcloud_client_job_status( int $job_id ): string|WP_Error {
  *
  * @return true|WP_Error True if the test status matches the code and message. WP_Error on error.
  */
-function wpcloud_client_test_status( int $code = 200, ?string $message = 'OK' ): true|WP_Error {
+function wpcloud_client_test_status( int $code = 200, ?string $message = 'OK' ): bool|WP_Error {
 	$result = wpcloud_client_get( null, "test-status/$code/$message" );
 
 	if ( is_wp_error( $result ) ) {
