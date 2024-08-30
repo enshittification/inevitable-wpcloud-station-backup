@@ -55,7 +55,7 @@ function wpcloud_get_api_key(): string {
 
 	// Else check the local options.
 	$options = get_option( 'wpcloud_options' ) ?? array();
-	return $options['wpcloud_api_key'] ?? null;
+	return $options['wpcloud_api_key'] ?? '';
 }
 
 /**
