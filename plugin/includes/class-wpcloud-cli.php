@@ -712,7 +712,7 @@ class WPCloud_CLI_Client extends WPCloud_CLI {
 		$options = get_option( 'wpcloud_settings' );
 
 		// Only allow changing the API key if it's not set in the environment.
-		if ( ! wpcloud_get_api_key() ) {
+		if ( ! wpcloud_get_api_key_from_env() ) {
 			if ( 'api_key' === $key && isset( $options['wpcloud_api_key'] ) ) {
 				WP_CLI::confirm( 'Are you sure you want to change the API key?' );
 			}

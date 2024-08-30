@@ -93,7 +93,7 @@ function wpcloud_settings_init(): void {
 	);
 
 	// Only show the API key field if it's not set in the environment.
-	if ( ! wpcloud_get_api_key() ) {
+	if ( ! wpcloud_get_api_key_from_env() ) {
 		add_settings_field(
 			'wpcloud_field_api_key',
 			__( 'API Key', 'wpcloud' ),

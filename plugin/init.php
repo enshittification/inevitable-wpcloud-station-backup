@@ -37,24 +37,16 @@ if ( ! is_admin() ) {
 }
 
 /**
- * Get the api key.
+ * Get the api key from the environment.
  */
-function wpcloud_get_api_key(): string {
-
-	// Try to find the key in the ENV or config.
+function wpcloud_get_api_key_from_env(): string {
 	$api_key = getenv( 'WP_CLOUD_API_KEY' );
 	if ( defined( 'WP_CLOUD_API_KEY' ) ) {
 		$api_key = WP_CLOUD_API_KEY;
 	}
 
 	$api_key = apply_filters( 'wpcloud_api_key', $api_key );
-
-	if ( $api_key ) {
-		return $api_key;
-	}
-	// Else check the local options.
-	$settings = get_option( 'wpcloud_settings', array() );
-	return $settings['wpcloud_api_key'] ?? '';
+	return $api_key ? $api_key : '';
 }
 
 /**

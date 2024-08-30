@@ -31,7 +31,12 @@ function wpcloud_get_client_name(): mixed {
  * @return string|null Client API Key on success. WP_Error on error.
  */
 function wpcloud_get_client_api_key(): mixed {
-	return wpcloud_get_api_key();
+	$api_key = wpcloud_get_api_key_from_env();
+	if ( $api_key ) {
+		return $api_key;
+	}
+	$settings = get_option( 'wpcloud_settings', array() );
+	return $settings['wpcloud_api_key'] ?? null;
 }
 
 /**
