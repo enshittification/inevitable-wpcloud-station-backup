@@ -703,10 +703,17 @@ class WPCLOUD_Site {
 	 * @param float $bytes The size in bytes.
 	 */
 	public static function readable_size( float $bytes = 0 ): string {
+		if ( 0.0 === $bytes ) {
+			return '0 B';
+		}
 		$i = floor( log( $bytes ) / log( 1024 ) );
 
 		$sizes = array( 'B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB' );
 
-		return sprintf( '%.02F', $bytes / pow( 1024, $i ) ) * 1 . ' ' . $sizes[ $i ];
+		$divisor = pow( 1024, $i );
+		if ( 0 === (int) $divisor ) {
+			return '0 B';
+		}
+		return sprintf( '%.02F', $bytes / $divisor ) * 1 . ' ' . $sizes[ $i ];
 	}
 }
