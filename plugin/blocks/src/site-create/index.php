@@ -39,6 +39,44 @@ function wpcloud_block_site_owner_options( $attributes ): array {
 	return $attributes;
 }
 add_filter( 'wpcloud_block_form_field_attributes_site_owner_id', 'wpcloud_block_site_owner_options' );
+
+
+/**
+ * Add Data Center options to the form.
+ *
+ * @param array $attributes The attributes of the field.
+ * @return array The attributes of the field.
+ */
+function wpcloud_block_attributes_data_center( $attributes ): array {
+	$dcs     = wpcloud_block_available_datacenters_options();
+	$options = array();
+	foreach ( $dcs as $key => $dc ) {
+		$options[ $key ] = $dc;
+	}
+
+	$attributes['options'] = $options;
+	return $attributes;
+}
+add_filter( 'wpcloud_block_form_field_attributes_data_center', 'wpcloud_block_attributes_data_center' );
+
+/**
+ * Add PHP version options to the form.
+ *
+ * @param array $attributes The attributes of the field.
+ * @return array The attributes of the field.
+ */
+function wpcloud_block_attributes_php_version( $attributes ): array {
+	$php_versions = wpcloud_block_available_php_options();
+	$options      = array();
+	foreach ( $php_versions as $key => $php_version ) {
+		$options[ $key ] = $php_version;
+	}
+
+	$attributes['options'] = $options;
+	return $attributes;
+}
+add_filter( 'wpcloud_block_form_field_attributes_php_version', 'wpcloud_block_attributes_php_version' );
+
 /**
  * Process the form data for site create
  *
@@ -76,70 +114,3 @@ function wpcloud_block_form_site_create_handler( $response, $data ) {
 	return $response;
 }
 add_filter( 'wpcloud_form_process_site_create', 'wpcloud_block_form_site_create_handler', 10, 2 );
-
-/**
- * Render the PHP version field with the available PHP versions.
- * We need to dynamically populate the PHP versions since they could change after the create site form is added to a page.
- *
- * @param string $content The content of the field.
- * @return string The content of the field with the PHP versions.
- */
-function wpcloud_block_form_render_field_php_version( $content ): string {
-
-	$php_versions = wpcloud_block_available_php_options();
-
-	// if for some reason we don't have any php versions, return the content as is.
-	if ( empty( $php_versions ) ) {
-		return $content;
-	}
-
-	$options = array_reduce(
-		array_keys( $php_versions ),
-		function ( $options, $key ) use ( $php_versions ) {
-
-			$options .= sprintf(
-				'<option value="%s">%s</option>',
-				$key,
-				$php_versions[ $key ]
-			);
-			return $options;
-		},
-		''
-	);
-
-	$regex = '/(<select[^>]*>)(?:\s*<option[^>]*>.*?<\/option>)*\s*(<\/select>)/';
-	return preg_replace( $regex, '$1' . $options . '$2', $content );
-}
-add_action( 'wpcloud_block_form_render_field_php_version', 'wpcloud_block_form_render_field_php_version' );
-
-/**
- * Render the data center field with the available data centers.
- *
- * @param string $content The content of the field.
- * @return string The content of the field with the data centers.
- */
-function wpcloud_block_form_render_field_data_center( $content ): string {
-	$dcs = wpcloud_block_available_datacenters_options();
-
-	// if for some reason we don't have any data centers, return the content as is.
-	if ( empty( $dcs ) ) {
-		return $content;
-	}
-
-	$options = array_reduce(
-		array_keys( $dcs ),
-		function ( $options, $key ) use ( $dcs ) {
-			$options .= sprintf(
-				'<option value="%s">%s</option>',
-				$key,
-				$dcs[ $key ]
-			);
-			return $options;
-		},
-		''
-	);
-
-	$regex = '/(<select[^>]*>)(?:\s*<option[^>]*>.*?<\/option>)*\s*(<\/select>)/';
-	return preg_replace( $regex, '$1' . $options . '$2', $content );
-}
-add_action( 'wpcloud_block_form_render_field_data_center', 'wpcloud_block_form_render_field_data_center' );
