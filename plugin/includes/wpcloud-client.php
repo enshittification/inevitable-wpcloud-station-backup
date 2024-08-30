@@ -486,7 +486,7 @@ function wpcloud_client_data_centers_available( bool $include_no_preference = fa
 
 		if ( $include_no_preference ) {
 			$available = $result;
-			$result = array(
+			$result    = array(
 				'' => __( 'No Preference' ),
 			);
 			foreach ( $available as $key => $name ) {
@@ -850,11 +850,70 @@ function wpcloud_client_test_status( int $code = 200, ?string $message = 'statio
 		return $result;
 	}
 
-	if ( $message !== $result->message || 'OK' !== $result->message ) {
+	if ( $message !== $result->message || 'station-status' !== $result->message ) {
 		return new WP_Error( 'failure', 'Unexpected response', array( 'status' => 500 ) );
 	}
 
 	return true;
+}
+
+/**
+ * Fetch the site error logs.
+ *
+ * @param string  $type            The type of logs to fetch. Options: 'site-error-logs', 'site-logs'.
+ * @param integer $wpcloud_site_id The WP Cloud Site ID.
+ * @param integer $start           The start time of the logs to fetch.
+ * @param integer $end             The end time of the logs to fetch.
+ * @param array   $options         Optional. Additional options for the log query.
+ *
+ * @return stdClass|WP_Error Site error logs on success. WP_Error on error.
+ */
+function wpcloud_client_logs( string $type, int $wpcloud_site_id, int $start, int $end, $options = array() ): stdClass|WP_Error {
+	$endpoint = "$type/$wpcloud_site_id";
+
+	$args = wp_parse_args(
+		$options,
+		array(
+			'start'     => $start,
+			'end'       => $end,
+			'page_size' => 500,
+			'scroll_id' => null,
+			'filter'    => array(),
+		)
+	);
+	return wpcloud_client_post( $wpcloud_site_id, $endpoint, $args );
+}
+
+/**
+ * Fetch the site error logs.
+ *
+ * @param integer $wpcloud_site_id The WP Cloud Site ID.
+ * @param integer $start           Optional. The start time of the logs to fetch. Default: 28 days ago.
+ * @param integer $end             Optional. The end time of the logs to fetch. Default: now.
+ * @param array   $options         Optional. Additional options for the log query.
+ *
+ * @return stdClass|WP_Error Site error logs on success. WP_Error on error.
+ */
+function wpcloud_client_site_error_logs( int $wpcloud_site_id, ?int $start, ?int $end, $options = array() ): stdClass|WP_Error {
+	$start = $start ?? strtotime( '-28 days' );
+	$end   = $end ?? time();
+	return wpcloud_client_logs( 'site-error-logs', $wpcloud_site_id, $start, $end, $options );
+}
+
+/**
+ * Fetch the site logs.
+ *
+ * @param integer $wpcloud_site_id The WP Cloud Site ID.
+ * @param integer $start           Optional. The start time of the logs to fetch. Default: 28 days ago.
+ * @param integer $end             Optional. The end time of the logs to fetch. Default: now.
+ * @param array   $options         Optional. Additional options for the log query.
+ *
+ * @return stdClass|WP_Error Site error logs on success. WP_Error on error.
+ */
+function wpcloud_client_site_logs( int $wpcloud_site_id, ?int $start, ?int $end, $options = array() ): stdClass|WP_Error {
+	$start = $start ?? strtotime( '-28 days' );
+	$end   = $end ?? time();
+	return wpcloud_client_logs( 'site-logs', $wpcloud_site_id, $start, $end, $options );
 }
 /**
  * Make a GET request the WP Cloud API.
