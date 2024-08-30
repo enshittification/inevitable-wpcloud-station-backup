@@ -49,13 +49,12 @@ function wpcloud_get_api_key(): string {
 
 	$api_key = apply_filters( 'wpcloud_api_key', $api_key );
 
-	if ( ! empty( $api_key ) ) {
+	if ( $api_key ) {
 		return $api_key;
 	}
-
 	// Else check the local options.
-	$options = get_option( 'wpcloud_options' ) ?? array();
-	return $options['wpcloud_api_key'] ?? '';
+	$settings = get_option( 'wpcloud_settings', array() );
+	return $settings['wpcloud_api_key'] ?? '';
 }
 
 /**
