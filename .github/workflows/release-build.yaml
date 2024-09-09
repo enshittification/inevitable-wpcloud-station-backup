@@ -33,8 +33,8 @@ jobs:
           zip -r ../temp/wpcloud-station/theme.zip . -x@.distignore
           cd ../temp/wpcloud-station
           unzip theme.zip
-          cd ../..
-          zip -r ./theme.zip temp
+          cd ../
+          zip -r ./theme.zip ./wpcloud-station
           rm -rf temp
 
       - name: Setup Node for plugin
@@ -54,8 +54,8 @@ jobs:
           zip -r ../temp/wpcloud-station/plugin.zip . -x@.distignore
           cd ../temp/wpcloud-station
           unzip plugin.zip
-          cd ../..
-          zip -r ./plugin.zip temp
+          cd ../
+          zip -r ./plugin.zip wpcloud-station
           rm -rf temp
 
       - name: Get release
