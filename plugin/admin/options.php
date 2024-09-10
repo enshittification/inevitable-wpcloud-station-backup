@@ -60,16 +60,6 @@ if ( ! $wpcloud_api_healthy ) {
 			</p>
 
 			<ul>
-			<?php if ( defined( 'IS_ATOMIC' ) && IS_ATOMIC ) : ?>
-				<li>
-					<p>
-						<?php esc_attr_e( 'It appears you are trying to run Station on a WP Cloud site. For security reasons, WP Cloud sites are unable to connect to the WP Cloud API directly. ' ); ?>
-					</p>
-					<p>
-						<strong><?php esc_attr_e( 'Please install Station on a different platform.' ); ?></strong>
-					</p>
-				</li>
-			<?php else : ?>
 				<?php if ( $ip_error ) : ?>
 				<li>
 					<p>
@@ -87,7 +77,6 @@ if ( ! $wpcloud_api_healthy ) {
 						</p>
 					</li>
 				<?php endif; ?>
-			<?php endif; ?>
 			</ul>
 			<p>
 				<?php esc_html_e( 'Return back to this page after correcting the API issues to continue configuring Station.' ); ?>
