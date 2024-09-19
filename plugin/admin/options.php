@@ -17,7 +17,7 @@ global $wpcloud_api_healthy;
 
 // Check for hosted Station sites.
 $wpcloud_is_atomic         = defined( 'IS_ATOMIC' ) && IS_ATOMIC;
-$wpcloud_is_hosted_station = defined( 'ATOMIC_CLIENT_ID' ) && defined( 'WP_STATION_CLIENT_ID' ) && WP_STATION_CLIENT_ID !== ATOMIC_CLIENT_ID;
+$wpcloud_is_hosted_station = defined( 'ATOMIC_CLIENT_ID' ) && defined( 'WP_STATION_CLIENT_ID' ) && WP_STATION_CLIENT_ID === ATOMIC_CLIENT_ID;
 
 $wpcloud_api_error = '';
 
